@@ -1,0 +1,40 @@
+# Build artifacts
+/build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.cmake
+
+# Compiled binaries
+*.exe
+*.out
+*.app
+*.o
+*.obj
+*.so
+*.dll
+*.dylib
+
+# IDE / Editor files
+.vscode/
+*.code-workspace
+.idea/
+*.suo
+*.user
+*.userprefs
+*.ncb
+*.sln
+*.vcxproj*
+*.xcodeproj
+*.xcworkspace
+
+# System / OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.log
+*.tmp
+*.swp
+*~
