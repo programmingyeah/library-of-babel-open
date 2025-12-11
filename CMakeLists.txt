@@ -3,8 +3,12 @@ project(LibraryOfBabel)
 
 set(CMAKE_CXX_STANDARD 17)
 
+file(COPY ${CMAKE_SOURCE_DIR}/src/shaders
+     DESTINATION ${CMAKE_BINARY_DIR}/src) # copy shaders into build to ensure proper relative dir 
+
 include_directories(external/glad/include)
 include_directories(external/glfw/include)
+include_directories(include)
 include_directories(src)
 
 add_library(glad external/glad/src/glad.c)
