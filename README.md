@@ -1,7 +1,9 @@
 # library-of-babel-opengl
 Library of babel from scratch using OpenGL
 
-To run:
+To install:
+
+git clone --recursive https://github.com/programmingyeah/library-of-babel-open.git
 
 -Navigate to build/
 
