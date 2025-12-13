@@ -32,7 +32,7 @@ int main() {
 
     while (!glfwWindowShouldClose(window)) {
 
-        renderer.drawFrame();
+        renderer.drawFrame(window);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

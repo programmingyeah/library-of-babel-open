@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
 
+struct GLFWwindow;
+
 class Renderer {
 public:
     Renderer() = default;
@@ -8,7 +10,7 @@ public:
 
     void setup();
 
-    void drawFrame();
+    void drawFrame(GLFWwindow* window);
 
 private:
 

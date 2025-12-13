@@ -3,16 +3,30 @@
 #include <fstream>
 #include <sstream>
 #include <glad/glad.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <GLFW/glfw3.h>
 
 float vertices[] = {
-    0.5f,  0.5f, 0.0f,  
-    0.5f, -0.5f, 0.0f,  
-    -0.5f, -0.5f, 0.0f,  
-    -0.5f,  0.5f, 0.0f   
+    // positions         // colors
+   -0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,
+    0.5f, -0.5f, -0.5f,  0.0f, 1.0f, 0.0f,
+    0.5f,  0.5f, -0.5f,  0.0f, 0.0f, 1.0f,
+   -0.5f,  0.5f, -0.5f,  1.0f, 1.0f, 0.0f,
+   -0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 1.0f,
+    0.5f, -0.5f,  0.5f,  0.0f, 1.0f, 1.0f,
+    0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 1.0f,
+   -0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 0.0f
 };
-unsigned int indices[] = {  
-    0, 1, 3,   
-    1, 2, 3   
+
+unsigned int indices[] = {
+    0,1,2, 2,3,0, // back face
+    4,5,6, 6,7,4, // front face
+    0,1,5, 5,4,0, // bottom
+    2,3,7, 7,6,2, // top
+    0,3,7, 7,4,0, // left
+    1,2,6, 6,5,1  // right
 };
 
 static std::string loadFile(const std::string& path) {
@@ -87,17 +101,39 @@ void Renderer::setup() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glEnable(GL_DEPTH_TEST);
 }
 
-void Renderer::drawFrame() {
-    glClear(GL_COLOR_BUFFER_BIT);
+void Renderer::drawFrame(GLFWwindow* window) {
+    int SCR_WIDTH = 0;
+    int SCR_HEIGHT = 0;
+    glfwGetWindowSize(window, &SCR_WIDTH, &SCR_HEIGHT);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glm::mat4 model = glm::rotate(glm::mat4(1.0f),
+                              (float)glfwGetTime(), 
+                              glm::vec3(0.5f, 1.0f, 0.0f));
+    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), 
+                                            (float)SCR_WIDTH / SCR_HEIGHT, 
+                                            0.1f, 100.0f);
 
     glUseProgram(shaderProgram);
+
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    const int indexCount = sizeof(indices)/sizeof(indices[0]);
+    glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
 }
