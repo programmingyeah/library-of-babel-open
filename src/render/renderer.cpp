@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <glad/glad.h>
 
 float vertices[] = {
     0.5f,  0.5f, 0.0f,  
