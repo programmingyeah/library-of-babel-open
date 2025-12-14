@@ -8,6 +8,7 @@ file(COPY ${CMAKE_SOURCE_DIR}/src/shaders
 
 include_directories(external/glad/include)
 include_directories(external/glfw/include)
+include_directories(external/glm)
 include_directories(include)
 include_directories(src)
 
