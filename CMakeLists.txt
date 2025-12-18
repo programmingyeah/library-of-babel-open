@@ -1,32 +1,88 @@
 cmake_minimum_required(VERSION 3.20)
-project(LibraryOfBabel)
+project(LibraryOfBabel LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
+# ------------------------------------------------------------
+# Assets
+# ------------------------------------------------------------
 file(COPY ${CMAKE_SOURCE_DIR}/src/shaders
-     DESTINATION ${CMAKE_BINARY_DIR}/src) # copy shaders into build to ensure proper relative dir 
+     DESTINATION ${CMAKE_BINARY_DIR}/src)
 
-include_directories(external/glad/include)
-include_directories(external/glfw/include)
-include_directories(external/glm)
-include_directories(include)
-include_directories(src)
+# ------------------------------------------------------------
+# Dependencies
+# ------------------------------------------------------------
 
-add_library(glad external/glad/src/glad.c)
+# GLAD
+add_library(glad STATIC external/glad/src/glad.c)
+target_include_directories(glad PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/glad/include
+)
 
+# GLFW
 add_subdirectory(external/glfw)
 
-file(GLOB SRC "src/*.cpp" "src/**/*.cpp")
+# Assimp
+add_subdirectory(external/assimp)
+
+# GLM (header-only)
+add_library(glm INTERFACE)
+target_include_directories(glm INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/glm
+)
+
+# stb (header-only)
+add_library(stb INTERFACE)
+target_include_directories(stb SYSTEM INTERFACE
+    ${CMAKE_CURRENT_SOURCE_DIR}/external/stb
+)
+
+# ------------------------------------------------------------
+# Executable
+# ------------------------------------------------------------
+
+file(GLOB_RECURSE SRC CONFIGURE_DEPENDS
+    src/*.cpp
+)
+
 add_executable(LoB ${SRC})
 
-target_link_libraries(LoB PRIVATE glad glfw)
+target_include_directories(LoB PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
+target_link_libraries(LoB PRIVATE
+    glad
+    glfw
+    assimp
+    glm
+    stb
+)
+
+# ------------------------------------------------------------
+# Platform-specific OpenGL
+# ------------------------------------------------------------
 
 if(APPLE)
-    find_library(COCOA_LIBRARY Cocoa)
-    find_library(OpenGL_LIBRARY OpenGL)
-    find_library(IOKIT_LIBRARY IOKit)
-    find_library(COREVIDEO_LIBRARY CoreVideo)
-    target_link_libraries(LoB PRIVATE ${COCOA_LIBRARY} ${OpenGL_LIBRARY} ${IOKIT_LIBRARY} ${COREVIDEO_LIBRARY})
+    find_library(COCOA_LIBRARY Cocoa REQUIRED)
+    find_library(OpenGL_LIBRARY OpenGL REQUIRED)
+    find_library(IOKIT_LIBRARY IOKit REQUIRED)
+    find_library(COREVIDEO_LIBRARY CoreVideo REQUIRED)
+
+    target_link_libraries(LoB PRIVATE
+        ${COCOA_LIBRARY}
+        ${OpenGL_LIBRARY}
+        ${IOKIT_LIBRARY}
+        ${COREVIDEO_LIBRARY}
+    )
 elseif(UNIX)
-    target_link_libraries(LoB PRIVATE dl X11 pthread GL)
+    target_link_libraries(LoB PRIVATE
+        dl
+        X11
+        pthread
+        GL
+    )
 endif()
