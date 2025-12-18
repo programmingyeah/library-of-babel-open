@@ -6,6 +6,7 @@
 
 
 struct GLFWwindow;
+struct Camera;
 
 class Renderer {
 public:
@@ -14,7 +15,7 @@ public:
 
     void setup();
 
-    void drawFrame(GLFWwindow* window, glm::vec3 cameraPos,  glm::vec3 cameraFront, glm::vec3 cameraUp);
+    void drawFrame(GLFWwindow* window, Camera camera);
 
 private:
 
