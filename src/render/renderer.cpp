@@ -8,6 +8,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <GLFW/glfw3.h>
 
+
+
 float vertices[] = {
     // positions         // colors
    -0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,
@@ -111,17 +113,17 @@ void Renderer::setup() {
     glEnable(GL_DEPTH_TEST);
 }
 
-void Renderer::drawFrame(GLFWwindow* window) {
+
+void Renderer::drawFrame(GLFWwindow* window, glm::vec3 cameraPos, glm::vec3 cameraFront, glm::vec3 cameraUp) {
     int SCR_WIDTH = 0;
     int SCR_HEIGHT = 0;
+
     glfwGetWindowSize(window, &SCR_WIDTH, &SCR_HEIGHT);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glm::mat4 model = glm::rotate(glm::mat4(1.0f),
-                              (float)glfwGetTime(), 
-                              glm::vec3(0.5f, 1.0f, 0.0f));
-    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
+    glm::mat4 model = glm::mat4(1.0f);
+    glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), 
                                             (float)SCR_WIDTH / SCR_HEIGHT, 
                                             0.1f, 100.0f);
@@ -137,3 +139,4 @@ void Renderer::drawFrame(GLFWwindow* window) {
     const int indexCount = sizeof(indices)/sizeof(indices[0]);
     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
 }
+
