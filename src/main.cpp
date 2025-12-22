@@ -7,14 +7,11 @@
 #include <iostream>
 #include "renderer.hpp"
 #include "camera.hpp"
-
-
+#include "mesh.hpp"
 
 float deltaTime, lastFrame;
 
 void processInput(GLFWwindow* window, float deltaTime, Camera &camera);
-
-
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -49,7 +46,10 @@ int main() {
     camera.setup(window);
     renderer.setup();  
 
-
+    std::string path = "/home/bakedsteak/projects/library-of-babel-opengl/assets/bongo.obj";
+    std::cout << "Loading models..." << std::endl;
+    Model model(path);
+    std::cout << "Models loaded" << std::endl;
 
     while (!glfwWindowShouldClose(window)) {
 
@@ -62,10 +62,9 @@ int main() {
 
         glfwGetWindowSize(window, &width, &height);
         camera.aspectRatio = (float) width/ (float) height;
-        std::cout << camera.aspectRatio << std::endl;
 
         processInput(window, deltaTime, camera);
-        renderer.drawFrame(window, camera);
+        renderer.drawFrame(window, camera, model);
 
         glfwSwapBuffers(window);
 
@@ -82,7 +81,7 @@ void processInput(GLFWwindow *window, float deltaTime, Camera &camera){
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
 
-    const float cameraSpeed = 1.5f * deltaTime; // adjust accordingly
+    const float cameraSpeed = 15.0f * deltaTime; // adjust accordingly
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         camera.pos += cameraSpeed * (camera.front - glm::dot(camera.front, UP) * UP);  //project to xzplane.
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)

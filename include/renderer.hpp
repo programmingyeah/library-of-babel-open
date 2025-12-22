@@ -7,6 +7,7 @@
 
 struct GLFWwindow;
 struct Camera;
+struct Model;
 
 class Renderer {
 public:
@@ -15,10 +16,9 @@ public:
 
     void setup();
 
-    void drawFrame(GLFWwindow* window, Camera camera);
+    void drawFrame(GLFWwindow* window, Camera camera, Model& model);
 
 private:
-
     uint32_t shaderProgram = 0;
     uint32_t VAO = 0;
     uint32_t VBO = 0;

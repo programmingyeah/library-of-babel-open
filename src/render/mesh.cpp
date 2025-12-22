@@ -86,6 +86,7 @@ void Mesh::Draw(uint32_t shader)
 {
     unsigned int diffuseNr = 1;
     unsigned int specularNr = 1;
+    //std::cout << textures.size() << std::endl;
     for(unsigned int i = 0; i < textures.size(); i++)
     {
         glActiveTexture(GL_TEXTURE0 + i);
@@ -208,3 +209,10 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType 
     }
     return textures;
 }  
+
+void Model::Draw(uint32_t shader)
+{
+    for(unsigned int i = 0; i < meshes.size(); i++) {
+        meshes[i].Draw(shader);
+    }
+}
