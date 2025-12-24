@@ -11,7 +11,6 @@ Makefile
 *.out
 *.app
 *.o
-*.obj
 *.so
 *.dll
 *.dylib
