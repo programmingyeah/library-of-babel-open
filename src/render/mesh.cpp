@@ -84,28 +84,39 @@ void Mesh::setupMesh()
 
 void Mesh::Draw(uint32_t shader) 
 {
+    glUseProgram(shader); 
+
     unsigned int diffuseNr = 1;
     unsigned int specularNr = 1;
-    //std::cout << textures.size() << std::endl;
+
     for(unsigned int i = 0; i < textures.size(); i++)
     {
         glActiveTexture(GL_TEXTURE0 + i);
+
         std::string number;
         std::string name = textures[i].type;
+
         if(name == "texture_diffuse")
             number = std::to_string(diffuseNr++);
         else if(name == "texture_specular")
             number = std::to_string(specularNr++);
 
-        glUniform1i(glGetUniformLocation(shader, ("material." + name + number).c_str()), i);
-        glBindTexture(GL_TEXTURE_2D, textures[i].id);
+        if (textures[i].id != 0)
+            glBindTexture(GL_TEXTURE_2D, textures[i].id);
+
+        glUniform1i(
+            glGetUniformLocation(shader, ("material." + name + number).c_str()),
+            i
+        );
     }
+
     glActiveTexture(GL_TEXTURE0);
 
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }
+
 
 void Model::loadModel(std::string path)
 {
@@ -141,58 +152,82 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
 
-    for(unsigned int i = 0; i < mesh->mNumVertices; i++)
+    for (unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
         Vertex vertex;
 
-        glm::vec3 vector; 
-        vector.x = mesh->mVertices[i].x;
-        vector.y = mesh->mVertices[i].y;
-        vector.z = mesh->mVertices[i].z; 
-        vertex.position = vector;
+        // position
+        vertex.position = glm::vec3(
+            mesh->mVertices[i].x,
+            mesh->mVertices[i].y,
+            mesh->mVertices[i].z
+        );
 
-        vector.x = mesh->mNormals[i].x;
-        vector.y = mesh->mNormals[i].y;
-        vector.z = mesh->mNormals[i].z;
-        vertex.normal = vector; 
+        // normal
+        vertex.normal = glm::vec3(
+            mesh->mNormals[i].x,
+            mesh->mNormals[i].y,
+            mesh->mNormals[i].z
+        );
 
-
-        if(mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
-        {
-            glm::vec2 vec;
-            vec.x = mesh->mTextureCoords[0][i].x; 
-            vec.y = mesh->mTextureCoords[0][i].y;
-            vertex.uv = vec;
-        }
+        // texture coords
+        if (mesh->mTextureCoords[0])
+            vertex.uv = glm::vec2(
+                mesh->mTextureCoords[0][i].x,
+                mesh->mTextureCoords[0][i].y
+            );
         else
-            vertex.uv = glm::vec2(0.0f, 0.0f);  
+            vertex.uv = glm::vec2(0.0f, 0.0f);
 
         vertices.push_back(vertex);
     }
-    // process indices
-    for(unsigned int i = 0; i < mesh->mNumFaces; i++)
+
+    for (unsigned int i = 0; i < mesh->mNumFaces; i++)
     {
         aiFace face = mesh->mFaces[i];
-        for(unsigned int j = 0; j < face.mNumIndices; j++)
+        for (unsigned int j = 0; j < face.mNumIndices; j++)
             indices.push_back(face.mIndices[j]);
-    } 
-    // process material
+    }
+
     if (mesh->mMaterialIndex >= 0)
     {
-        if(mesh->mMaterialIndex >= 0)
+        aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+
+        // diffuse textures
+        std::vector<Texture> diffuseMaps = loadMaterialTextures(
+            material, aiTextureType_DIFFUSE, "texture_diffuse"
+        );
+        textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
+
+        // specular textures
+        std::vector<Texture> specularMaps = loadMaterialTextures(
+            material, aiTextureType_SPECULAR, "texture_specular"
+        );
+        textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+
+        // default fallback
+        if (textures.empty())
         {
-            aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
-            std::vector<Texture> diffuseMaps = loadMaterialTextures(material, 
-                                                aiTextureType_DIFFUSE, "texture_diffuse");
-            textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-            std::vector<Texture> specularMaps = loadMaterialTextures(material, 
-                                                aiTextureType_SPECULAR, "texture_specular");
-            textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-        }  
+            Texture defaultTex;
+            defaultTex.id = 0;                // 0 = no texture bound
+            defaultTex.type = "texture_diffuse";
+            defaultTex.path = "default_white";
+            textures.push_back(defaultTex);
+        }
+    }
+    else
+    {
+        // push default if no mat
+        Texture defaultTex;
+        defaultTex.id = 0;
+        defaultTex.type = "texture_diffuse";
+        defaultTex.path = "default_white";
+        textures.push_back(defaultTex);
     }
 
     return Mesh(vertices, indices, textures);
-}  
+}
+
 
 std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName)
 {

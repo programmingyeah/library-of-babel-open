@@ -14,10 +14,13 @@ struct Material {
 };
 
 uniform Material material;
+uniform vec3 uViewPos;
+
+uniform vec3 uDiffuseFallback = vec3(1.0);    
+uniform vec3 uSpecularFallback = vec3(0.5);   
 
 vec3 uLightDir = vec3(-1,-1,-1);
 vec3 uLightColor = vec3(1,1.0,0.8);
-uniform vec3 uViewPos;
 
 void main()
 {
@@ -26,8 +29,13 @@ void main()
 
     float diff = max(dot(N, L), 0.0);
 
-    vec3 diffuseColor = texture(material.texture_diffuse1, vUv).rgb;
-    vec3 specularColor = texture(material.texture_specular1, vUv).rgb;
+    vec3 diffuseColor = textureSize(material.texture_diffuse1,0).x > 0 ?
+                        texture(material.texture_diffuse1, vUv).rgb :
+                        uDiffuseFallback;
+
+    vec3 specularColor = textureSize(material.texture_specular1,0).x > 0 ?
+                         texture(material.texture_specular1, vUv).rgb :
+                         uSpecularFallback;
 
     vec3 V = normalize(uViewPos - vPos);
     vec3 R = reflect(-L, N);
