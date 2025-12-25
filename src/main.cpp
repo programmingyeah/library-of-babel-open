@@ -5,6 +5,8 @@
 #include <GLFW/glfw3.h>
 #include <cstdint>
 #include <iostream>
+#include <filesystem>
+#include <unistd.h>
 #include "renderer.hpp"
 #include "camera.hpp"
 #include "mesh.hpp"
@@ -17,6 +19,16 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
 
+}
+
+std::filesystem::path getExecutableDir() {
+    char buf[4096];
+    ssize_t len = readlink("/proc/self/exe", buf, sizeof(buf) - 1);
+    if (len != -1) {
+        buf[len] = '\0';
+        return std::filesystem::path(buf).parent_path();
+    }
+    throw std::runtime_error("Cannot determine executable path");
 }
 
 int main() {
@@ -46,7 +58,11 @@ int main() {
     camera.setup(window);
     renderer.setup();  
 
-    std::string path = "/home/bakedsteak/projects/library-of-babel-opengl/assets/room1.obj";
+    std::filesystem::path exeDir = getExecutableDir();
+    std::filesystem::path assetPath =
+    exeDir.parent_path() / "assets" / "Untitled.obj";
+
+    std::string path = assetPath.string();
     std::cout << "Loading models..." << std::endl;
     Model model(path);
     std::cout << "Models loaded" << std::endl;
