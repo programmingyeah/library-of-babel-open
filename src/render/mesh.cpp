@@ -121,7 +121,13 @@ void Mesh::Draw(uint32_t shader)
 void Model::loadModel(std::string path)
 {
     Assimp::Importer import;
-    const aiScene *scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);	
+    const aiScene *scene = import.ReadFile(path,
+    aiProcess_Triangulate |
+    aiProcess_FlipUVs |
+    aiProcess_CalcTangentSpace |
+    aiProcess_GenSmoothNormals |      // generate normals if missing
+    aiProcess_FlipWindingOrder        // flips faces so normals point consistently
+);
 	
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) 
     {
@@ -146,31 +152,48 @@ void Model::processNode(aiNode *node, const aiScene *scene)
     }
 } 
 
+GLuint createUniformTexture(unsigned char data[3])
+{
+    GLuint texID;
+    glGenTextures(1, &texID);
+    glBindTexture(GL_TEXTURE_2D, texID);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    return texID;
+}
+
 Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
 
+    if (!mesh->HasNormals()) {
+        std::cout << "Mesh has no normals!" << std::endl;
+    }
+
     for (unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
         Vertex vertex;
 
-        // position
         vertex.position = glm::vec3(
             mesh->mVertices[i].x,
             mesh->mVertices[i].y,
             mesh->mVertices[i].z
         );
 
-        // normal
         vertex.normal = glm::vec3(
             mesh->mNormals[i].x,
             mesh->mNormals[i].y,
             mesh->mNormals[i].z
         );
 
-        // texture coords
         if (mesh->mTextureCoords[0])
             vertex.uv = glm::vec2(
                 mesh->mTextureCoords[0][i].x,
@@ -204,30 +227,32 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
             material, aiTextureType_SPECULAR, "texture_specular"
         );
         textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-
-        // default fallback
-        if (textures.empty())
-        {
-            Texture defaultTex;
-            defaultTex.id = 0;                // 0 = no texture bound
-            defaultTex.type = "texture_diffuse";
-            defaultTex.path = "default_white";
-            textures.push_back(defaultTex);
-        }
     }
-    else
+
+    if (textures.empty())
     {
-        // push default if no mat
+        // diffuse
         Texture defaultTex;
-        defaultTex.id = 0;
+        unsigned char data[3] = {255, 255, 255};
+        defaultTex.id = createUniformTexture(data);
         defaultTex.type = "texture_diffuse";
         defaultTex.path = "default_white";
         textures.push_back(defaultTex);
+
+        // specular
+        Texture defaultSpec;
+        unsigned char data2[3] = {128, 128, 128};
+        defaultSpec.id = createUniformTexture(data2);
+        defaultSpec.type = "texture_specular";
+        defaultSpec.path = "default_gray";
+        textures.push_back(defaultSpec);
+
+        std::cout << "Default diffuse ID: " << defaultTex.id 
+          << ", default spec ID: " << defaultSpec.id << std::endl;
     }
 
     return Mesh(vertices, indices, textures);
 }
-
 
 std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName)
 {

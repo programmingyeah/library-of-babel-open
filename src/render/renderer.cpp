@@ -102,6 +102,7 @@ void Renderer::drawFrame(GLFWwindow* window, Camera camera, Model& modelObj) {
 
     glfwGetWindowSize(window, &SCR_WIDTH, &SCR_HEIGHT);
 
+    glClearColor(0.1f, 0.2f, 0.3f, 1.0f); 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glm::mat4 model = glm::mat4(1.0f);

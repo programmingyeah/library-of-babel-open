@@ -46,7 +46,7 @@ int main() {
     camera.setup(window);
     renderer.setup();  
 
-    std::string path = "/home/bakedsteak/projects/library-of-babel-opengl/assets/bongo.obj";
+    std::string path = "/home/bakedsteak/projects/library-of-babel-opengl/assets/room1.obj";
     std::cout << "Loading models..." << std::endl;
     Model model(path);
     std::cout << "Models loaded" << std::endl;

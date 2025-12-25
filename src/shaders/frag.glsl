@@ -41,9 +41,12 @@ void main()
     vec3 R = reflect(-L, N);
     float spec = pow(max(dot(V, R), 0.0), 32.0);
 
+    vec3 ambient = 0.1 * diffuseColor;
+
     vec3 color =
-        diffuseColor * diff * uLightColor +
-        specularColor * spec * uLightColor;
+        ambient +                // ambient
+        diffuseColor * diff * uLightColor +   // diffuse
+        specularColor * spec * uLightColor;  // specular
     
     FragColor = vec4(color, 1.0);
 }
