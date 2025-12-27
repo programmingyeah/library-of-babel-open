@@ -10,8 +10,13 @@
 #include "renderer.hpp"
 #include "camera.hpp"
 #include "mesh.hpp"
+#include "chunk.hpp"
+#include <algorithm>
+
+int GEN_RADIUS = 10;
 
 float deltaTime, lastFrame;
+std::vector<Chunk> chunks{};
 
 void processInput(GLFWwindow* window, float deltaTime, Camera &camera);
 
@@ -31,6 +36,17 @@ std::filesystem::path getExecutableDir() {
     throw std::runtime_error("Cannot determine executable path");
 }
 
+glm::ivec3 gridPosFromWorldPos(glm::vec3 pos) {
+    return glm::ivec3(glm::floor(pos / Chunk::chunkDimensions));
+}
+
+Chunk generateChunk(glm::ivec3 gridPos, Model* model) {
+    //will be expanded on later
+    Chunk chunk(model, gridPos);
+
+    return chunk;
+}
+
 int main() {
     if (!glfwInit()) return -1;
 
@@ -47,12 +63,9 @@ int main() {
         return -1;
     }
 
-
-
     Camera camera{};
     Renderer renderer{};
     renderer.setup();    
-
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     camera.setup(window);
@@ -67,6 +80,9 @@ int main() {
     Model model(path);
     std::cout << "Models loaded" << std::endl;
 
+    std::vector<GameObject*> objects;
+
+    glm::ivec3 prevPlrGridPos = glm::ivec3(10000,100000,100);//to check if player has entered a new chunk
     while (!glfwWindowShouldClose(window)) {
 
         glfwPollEvents();    
@@ -80,7 +96,54 @@ int main() {
         camera.aspectRatio = (float) width/ (float) height;
 
         processInput(window, deltaTime, camera);
-        renderer.drawFrame(window, camera, model);
+
+        // chunk generation
+        glm::ivec3 plrGridPos = gridPosFromWorldPos(camera.pos);
+
+        if (plrGridPos != prevPlrGridPos) {
+
+            //add chunks
+            for (int dx = -GEN_RADIUS; dx <= GEN_RADIUS; dx++) 
+            for (int dy = -GEN_RADIUS; dy <= GEN_RADIUS; dy++) 
+            {
+                //note we only care about a 2d slice 
+                glm::ivec3 targetPos = plrGridPos+glm::ivec3(dx,dy,0);
+                targetPos.z = 0;
+
+                bool foundChunk = false;
+                for (const Chunk& chunk : chunks) {
+                    if (chunk.gridPos == targetPos) {
+                        foundChunk = true;
+                        continue;
+                    }
+                }
+                if (foundChunk == true) continue;
+
+                //generate chunk if it doesnt exist
+                chunks.push_back(generateChunk(targetPos, &model));
+            }
+
+            //remove chunks
+            for (int i = chunks.size() - 1; i >= 0; --i) {
+                glm::ivec3 diff = abs(chunks[i].gridPos - plrGridPos);
+                int maxDist = std::max({diff.x, diff.y, diff.z}); 
+
+
+                if (maxDist > GEN_RADIUS) {
+                    chunks.erase(chunks.begin() + i);
+                }
+            }
+
+            // extract object data
+            objects.clear();
+            for (Chunk& chunk : chunks) {
+                objects.push_back(&chunk.object);
+            }
+
+            prevPlrGridPos = plrGridPos;
+        }
+
+        renderer.drawFrame(window, camera, objects);
 
         glfwSwapBuffers(window);
 

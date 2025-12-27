@@ -8,8 +8,7 @@
 #include <GLFW/glfw3.h>
 #include "camera.hpp"
 #include "renderer.hpp"
-#include "mesh.hpp"
-
+#include "game_object.hpp"
 
 float vertices[] = {
     // positions         // colors
@@ -96,7 +95,7 @@ void Renderer::setup() {
 }
 
 
-void Renderer::drawFrame(GLFWwindow* window, Camera camera, Model& modelObj) {
+void Renderer::drawFrame(GLFWwindow* window, Camera camera, std::vector<GameObject*> objects) {
     int SCR_WIDTH = 0;
     int SCR_HEIGHT = 0;
 
@@ -105,21 +104,23 @@ void Renderer::drawFrame(GLFWwindow* window, Camera camera, Model& modelObj) {
     glClearColor(0.1f, 0.2f, 0.3f, 1.0f); 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glm::mat4 model = glm::mat4(1.0f);
-    glm::mat4 view = camera.getViewMatrix();
-    glm::mat4 projection = camera.getProjectionMatrix();
-
-    glUseProgram(shaderProgram);
-
-    //uniforms
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
-    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
-    GLuint loc = glGetUniformLocation(shaderProgram, "uViewPos");
-    glUniform3fv(loc, 1, glm::value_ptr(camera.pos));
-
     //draw commands
-    modelObj.Draw(shaderProgram);
-    
-}
+    for (GameObject* obj : objects) {
+        //note: wrap this inside gameobject later, idk figure it out
 
+        glm::mat4 model = glm::translate(glm::mat4(1.0), obj->position);
+        glm::mat4 view = camera.getViewMatrix();
+        glm::mat4 projection = camera.getProjectionMatrix();
+
+        glUseProgram(shaderProgram);
+
+        //uniforms
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
+        GLuint loc = glGetUniformLocation(shaderProgram, "uViewPos");
+        glUniform3fv(loc, 1, glm::value_ptr(camera.pos));
+
+        obj->Draw(shaderProgram);
+    }
+}

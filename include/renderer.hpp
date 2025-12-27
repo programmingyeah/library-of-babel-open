@@ -7,7 +7,7 @@
 
 struct GLFWwindow;
 struct Camera;
-struct Model;
+struct GameObject;
 
 class Renderer {
 public:
@@ -16,7 +16,7 @@ public:
 
     void setup();
 
-    void drawFrame(GLFWwindow* window, Camera camera, Model& model);
+    void drawFrame(GLFWwindow* window, Camera camera, std::vector<GameObject*> models);
 
 private:
     uint32_t shaderProgram = 0;

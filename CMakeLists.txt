@@ -1,25 +1,16 @@
 cmake_minimum_required(VERSION 3.20)
 project(LibraryOfBabel LANGUAGES C CXX)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# ------------------------------------------------------------
-# Assets
-# ------------------------------------------------------------
+# Copy shaders
 file(COPY ${CMAKE_SOURCE_DIR}/src/shaders
      DESTINATION ${CMAKE_BINARY_DIR}/src)
 
-# ------------------------------------------------------------
-# Dependencies
-# ------------------------------------------------------------
-
 # GLAD
 add_library(glad STATIC external/glad/src/glad.c)
-target_include_directories(glad PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/external/glad/include
-)
+target_include_directories(glad PUBLIC external/glad/include)
 
 # GLFW
 add_subdirectory(external/glfw)
@@ -29,30 +20,26 @@ add_subdirectory(external/assimp)
 
 # GLM (header-only)
 add_library(glm INTERFACE)
-target_include_directories(glm INTERFACE
-    ${CMAKE_CURRENT_SOURCE_DIR}/external/glm
-)
+target_include_directories(glm INTERFACE external/glm)
 
-# stb (header-only)
+# STB (header-only)
 add_library(stb INTERFACE)
-target_include_directories(stb SYSTEM INTERFACE
-    ${CMAKE_CURRENT_SOURCE_DIR}/external/stb
-)
+target_include_directories(stb SYSTEM INTERFACE external/stb)
 
-# ------------------------------------------------------------
-# Executable
-# ------------------------------------------------------------
-
-file(GLOB_RECURSE SRC CONFIGURE_DEPENDS
-    src/*.cpp
+# ============================
+# Add all your project sources explicitly
+# ============================
+set(SRC
+    src/main.cpp
+    src/render/renderer.cpp
+    src/render/mesh.cpp
+    src/world/game_object.cpp
+    src/camera.cpp
 )
 
 add_executable(LoB ${SRC})
 
-target_include_directories(LoB PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
-)
+target_include_directories(LoB PRIVATE include src)
 
 target_link_libraries(LoB PRIVATE
     glad
@@ -61,10 +48,6 @@ target_link_libraries(LoB PRIVATE
     glm
     stb
 )
-
-# ------------------------------------------------------------
-# Platform-specific OpenGL
-# ------------------------------------------------------------
 
 if(APPLE)
     find_library(COCOA_LIBRARY Cocoa REQUIRED)
