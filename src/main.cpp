@@ -163,9 +163,9 @@ void processInput(GLFWwindow *window, float deltaTime, Camera &camera){
 
     const float cameraSpeed = 15.0f * deltaTime; // adjust accordingly
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.pos += cameraSpeed * (camera.front - glm::dot(camera.front, UP) * UP);  //project to xzplane.
+        camera.pos += cameraSpeed * glm::normalize(camera.front - glm::dot(camera.front, UP) * UP);  //project to xzplane.
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.pos -= cameraSpeed * (camera.front - glm::dot(camera.front, UP) * UP);
+        camera.pos -= cameraSpeed * glm::normalize(camera.front - glm::dot(camera.front, UP) * UP);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         camera.pos -= glm::normalize(glm::cross(camera.front, camera.up)) * cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
