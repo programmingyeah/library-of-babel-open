@@ -13,7 +13,7 @@
 #include "chunk.hpp"
 #include <algorithm>
 
-int GEN_RADIUS = 3;
+int GEN_RADIUS = 5;
 
 float deltaTime, lastFrame;
 std::vector<Chunk> chunks{};
@@ -23,7 +23,6 @@ void processInput(GLFWwindow* window, float deltaTime, Camera &camera);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
-
 }
 
 std::filesystem::path getExecutableDir() {

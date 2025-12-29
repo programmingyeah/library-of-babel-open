@@ -202,14 +202,30 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
         else
             vertex.uv = glm::vec2(0.0f, 0.0f);
 
+            
+
         vertices.push_back(vertex);
     }
 
     for (unsigned int i = 0; i < mesh->mNumFaces; i++)
     {
         aiFace face = mesh->mFaces[i];
-        for (unsigned int j = 0; j < face.mNumIndices; j++)
-            indices.push_back(face.mIndices[j]);
+
+        // skip fake  triangles
+        if (face.mNumIndices != 3)
+            continue;
+
+        // skip degenerates
+        unsigned int a = face.mIndices[0];
+        unsigned int b = face.mIndices[1];
+        unsigned int c = face.mIndices[2];
+
+        if (a == b || b == c || a == c)
+            continue;
+
+        indices.push_back(a);
+        indices.push_back(b);
+        indices.push_back(c);
     }
 
     if (mesh->mMaterialIndex >= 0)
