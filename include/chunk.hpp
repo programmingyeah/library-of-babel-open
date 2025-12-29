@@ -6,7 +6,7 @@ struct GameObject;
 class Model;
 struct Chunk {
 public:
-    static inline const glm::vec3 chunkDimensions{ 13.43, 3.1, 10 }; //small buffer space in the y-direction cuz z-clipping
+    static inline const glm::vec3 chunkDimensions{ 18.763, 2.501, 10 }; //small buffer space in the y-direction cuz z-clipping
 
     GameObject object;
     glm::ivec3 gridPos;

@@ -13,7 +13,7 @@
 #include "chunk.hpp"
 #include <algorithm>
 
-int GEN_RADIUS = 10;
+int GEN_RADIUS = 3;
 
 float deltaTime, lastFrame;
 std::vector<Chunk> chunks{};
@@ -73,7 +73,7 @@ int main() {
 
     std::filesystem::path exeDir = getExecutableDir();
     std::filesystem::path assetPath =
-    exeDir.parent_path() / "assets" / "room1.obj";
+    exeDir.parent_path() / "assets" / "room" / "finished1.obj";
 
     std::string path = assetPath.string();
     std::cout << "Loading models..." << std::endl;
@@ -143,6 +143,7 @@ int main() {
             prevPlrGridPos = plrGridPos;
         }
 
+        
         renderer.drawFrame(window, camera, objects);
 
         glfwSwapBuffers(window);
