@@ -72,7 +72,7 @@ int main() {
 
     std::filesystem::path exeDir = getExecutableDir();
     std::filesystem::path assetPath =
-    exeDir.parent_path() / "assets" / "room" / "finished1.obj";
+    exeDir.parent_path() / "assets" / "room" / "finished6.obj";
 
     std::string path = assetPath.string();
     std::cout << "Loading models..." << std::endl;

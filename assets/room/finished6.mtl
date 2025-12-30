@@ -1,0 +1,189 @@
+# Blender 5.0.0 MTL File: 'finished5.blend'
+# www.blender.org
+
+newmtl Material
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd textures/textures/wood_floor_deck_diff_4k.jpg
+map_Ns textures/textures/wood_floor_deck_rough_4k.exr
+map_Bump -bm 1.000000 textures/textures/wood_floor_deck_nor_gl_4k.exr
+
+newmtl Material.001
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd textures/textures/wood_floor_deck_diff_4k.jpg
+map_Ns textures/textures/wood_floor_deck_rough_4k.exr
+map_Bump -bm 1.000000 textures/textures/wood_floor_deck_nor_gl_4k.exr
+
+newmtl Wallpaper
+Ka 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd textures/wallpaper_09_color.jpg
+map_Ns textures/wallpaper_09_roughness.jpg
+
+newmtl Wood.117
+Ka 0.372727 0.372727 0.372727
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/wood-47-dark_diffuse.jpg
+map_Ns textures/wood-47_smooth.jpg
+
+newmtl laiton.001
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 0.784649 0.277636
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Ns textures/Metal007_2K_Roughness.jpg
+map_Bump -bm 1.000000 textures/Metal007_2K_NormalGL.jpg
+
+newmtl laiton.002
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/Metal007_2K_Roughness.jpg
+map_Ns textures/Metal007_2K_Roughness.jpg
+
+newmtl lumière_blanche.001
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 1000.000000 1000.000000 800.000000
+Ni 1.450000
+d 1.000000
+illum 2
+
+newmtl marbre_blanc
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Ns textures/Marble021_4K_Roughness.jpg
+
+newmtl metal_dark.002
+Ns 490.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd textures/Smudges_01_4K.png
+
+newmtl miroir
+Ns 250.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+
+newmtl métal_gris_brillant.001
+Ka 1.000000 1.000000 1.000000
+Kd 1.000000 0.784649 0.277636
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+map_Ns textures/Metal007_2K_Roughness.jpg
+map_Bump -bm 2.000000 textures/Metal007_2K_NormalGL.jpg
+
+newmtl métal_noir_brillant
+Ns 10.000005
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.429091 0.429091 0.429091
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_refl textures/Bronze_01_metal_xtm.jpg
+map_Bump -bm 0.500000 textures/Bronze_01_normal_xtm.jpg
+
+newmtl tissus_bleu_marine.001
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd textures/Texture 4.jpeg
+map_Ns textures/Fabric030_4K_Roughness.jpg
+
+newmtl verre_avec_dégradé_ambre_inversé.001
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 0.120690
+illum 6
+
+newmtl verre_sans_bevel.002
+Ns 1000.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 0.120690
+illum 6
+
+newmtl wood.001
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd -s 18 18 18 textures/Wood26_col.jpg
+map_Ns -s 18 18 18 textures/Wood20_rgh.jpg
+
+newmtl wood.yellow
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd -s 9 9 9 textures/Wood26_col.jpg
+map_Ns -s 9 9 9 textures/Wood20_rgh.jpg
+
+newmtl wood_floor_deck
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd textures/wood_floor_deck_diff_8k.jpg
+map_Ns textures/wood_floor_deck_rough_8k.exr
+map_Bump -bm 1.000000 textures/wood_floor_deck_nor_gl_8k.exr
