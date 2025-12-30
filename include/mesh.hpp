@@ -23,9 +23,9 @@ class Mesh {
         std::vector<Texture>      textures;
 
         Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
-        void Draw(uint32_t shader);
-    private:
+
         unsigned int VAO, VBO, EBO;
+    private:
 
         void setupMesh();
 };
@@ -37,9 +37,9 @@ class Model
         {
             loadModel(path);
         }
-        void Draw(uint32_t shader);	
-    private:
+
         std::vector<Mesh> meshes;
+    private:
         std::string directory;
 
         void loadModel(std::string path);

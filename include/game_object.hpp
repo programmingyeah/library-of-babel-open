@@ -10,6 +10,4 @@ struct GameObject {
 
     GameObject(Model* mod, glm::vec3 pos)
         : model(mod), position(pos) {}
-
-    void Draw(unsigned int shaderProgram);
 };

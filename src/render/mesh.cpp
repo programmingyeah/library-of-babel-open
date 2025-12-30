@@ -82,41 +82,6 @@ void Mesh::setupMesh()
     glBindVertexArray(0);
 }  
 
-void Mesh::Draw(uint32_t shader) 
-{
-    glUseProgram(shader); 
-
-    unsigned int diffuseNr = 1;
-    unsigned int specularNr = 1;
-
-    for(unsigned int i = 0; i < textures.size(); i++)
-    {
-        glActiveTexture(GL_TEXTURE0 + i);
-
-        std::string number;
-        std::string name = textures[i].type;
-
-        if(name == "texture_diffuse")
-            number = std::to_string(diffuseNr++);
-        else if(name == "texture_specular")
-            number = std::to_string(specularNr++);
-
-        if (textures[i].id != 0)
-            glBindTexture(GL_TEXTURE_2D, textures[i].id);
-
-        glUniform1i(
-            glGetUniformLocation(shader, ("material." + name + number).c_str()),
-            i
-        );
-    }
-
-    glActiveTexture(GL_TEXTURE0);
-
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-}
-
 
 void Model::loadModel(std::string path)
 {
@@ -285,10 +250,3 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType 
     }
     return textures;
 }  
-
-void Model::Draw(uint32_t shader)
-{
-    for(unsigned int i = 0; i < meshes.size(); i++) {
-        meshes[i].Draw(shader);
-    }
-}

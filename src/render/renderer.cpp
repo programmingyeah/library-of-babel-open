@@ -9,6 +9,7 @@
 #include "camera.hpp"
 #include "renderer.hpp"
 #include "game_object.hpp"
+#include "mesh.hpp"
 
 float vertices[] = {
     // positions         // colors
@@ -94,6 +95,43 @@ void Renderer::setup() {
     glEnable(GL_DEPTH_TEST);
 }
 
+void Renderer::drawModel(Model* model) {
+    if (!model) return;
+
+    for(unsigned int i = 0; i < model->meshes.size(); i++) {
+        glUseProgram(shaderProgram); 
+
+        unsigned int diffuseNr = 1;
+        unsigned int specularNr = 1;
+
+        for(unsigned int j = 0; j < model->meshes[i].textures.size(); j++)
+        {
+            glActiveTexture(GL_TEXTURE0 + j);
+
+            std::string number;
+            std::string name = model->meshes[i].textures[j].type;
+
+            if(name == "texture_diffuse")
+                number = std::to_string(diffuseNr++);
+            else if(name == "texture_specular")
+                number = std::to_string(specularNr++);
+
+            if (model->meshes[i].textures[j].id != 0)
+                glBindTexture(GL_TEXTURE_2D, model->meshes[i].textures[j].id);
+
+            glUniform1i(
+                glGetUniformLocation(shaderProgram, ("material." + name + number).c_str()),
+                j
+            );
+        }
+
+        glActiveTexture(GL_TEXTURE0);
+
+        glBindVertexArray(model->meshes[i].VAO);
+        glDrawElements(GL_TRIANGLES, model->meshes[i].indices.size(), GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
+    }
+}
 
 void Renderer::drawFrame(GLFWwindow* window, Camera camera, std::vector<GameObject*> objects) {
     int SCR_WIDTH = 0;
@@ -121,6 +159,7 @@ void Renderer::drawFrame(GLFWwindow* window, Camera camera, std::vector<GameObje
         GLuint loc = glGetUniformLocation(shaderProgram, "uViewPos");
         glUniform3fv(loc, 1, glm::value_ptr(camera.pos));
 
-        obj->Draw(shaderProgram);
+        //obj->Draw(shaderProgram);
+        drawModel(obj->model);
     }
 }
