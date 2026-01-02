@@ -13,7 +13,7 @@
 #include "chunk.hpp"
 #include <algorithm>
 
-int GEN_RADIUS = 3;
+int GEN_RADIUS = 8;
 
 float deltaTime, lastFrame;
 std::vector<Chunk> chunks{};
@@ -160,7 +160,7 @@ void processInput(GLFWwindow *window, float deltaTime, Camera &camera){
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
 
-    const float cameraSpeed = 15.0f * deltaTime; // adjust accordingly
+    const float cameraSpeed = 5.0f * deltaTime; // adjust accordingly
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         camera.pos += cameraSpeed * glm::normalize(camera.front - glm::dot(camera.front, UP) * UP);  //project to xzplane.
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
