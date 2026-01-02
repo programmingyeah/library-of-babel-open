@@ -13,7 +13,7 @@
 #include "chunk.hpp"
 #include <algorithm>
 
-int GEN_RADIUS = 5;
+int GEN_RADIUS = 3;
 
 float deltaTime, lastFrame;
 std::vector<Chunk> chunks{};

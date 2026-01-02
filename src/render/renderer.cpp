@@ -143,8 +143,7 @@ void Renderer::drawFrame(GLFWwindow* window, Camera camera, std::vector<GameObje
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     //draw commands
-    for (GameObject* obj : objects) {
-        //note: wrap this inside gameobject later, idk figure it out
+    /*for (GameObject* obj : objects) {
 
         glm::mat4 model = glm::translate(glm::mat4(1.0), obj->position);
         glm::mat4 view = camera.getViewMatrix();
@@ -159,7 +158,76 @@ void Renderer::drawFrame(GLFWwindow* window, Camera camera, std::vector<GameObje
         GLuint loc = glGetUniformLocation(shaderProgram, "uViewPos");
         glUniform3fv(loc, 1, glm::value_ptr(camera.pos));
 
-        //obj->Draw(shaderProgram);
         drawModel(obj->model);
+    }*/
+
+    std::unordered_map<Model*, std::vector<glm::mat4>> batches;
+
+    for (GameObject* obj : objects) {
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), obj->position);
+        batches[obj->model].push_back(model);
+    }
+
+
+    for (auto& [model, transforms] : batches) {
+
+        for (Mesh& mesh : model->meshes) {
+            glm::mat4 view = camera.getViewMatrix();
+            glm::mat4 projection = camera.getProjectionMatrix();
+
+            glUseProgram(shaderProgram);
+
+            //bind textures
+            unsigned int diffuseNr = 1;
+            unsigned int specularNr = 1;
+
+            for(unsigned int j = 0; j < mesh.textures.size(); j++)
+            {
+                glActiveTexture(GL_TEXTURE0 + j);
+
+                std::string number;
+                std::string name = mesh.textures[j].type;
+
+                if(name == "texture_diffuse")
+                    number = std::to_string(diffuseNr++);
+                else if(name == "texture_specular")
+                    number = std::to_string(specularNr++);
+
+                if (mesh.textures[j].id != 0)
+                    glBindTexture(GL_TEXTURE_2D, mesh.textures[j].id);
+
+                glUniform1i(
+                    glGetUniformLocation(shaderProgram, ("material." + name + number).c_str()),
+                    j
+                );
+            }
+
+            glActiveTexture(GL_TEXTURE0);
+
+            //uniforms
+            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
+            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
+            GLuint loc = glGetUniformLocation(shaderProgram, "uViewPos");
+            glUniform3fv(loc, 1, glm::value_ptr(camera.pos));
+
+            //bind and initialize instancing data
+            glBindBuffer(GL_ARRAY_BUFFER, mesh.instanceVBO);
+            glBufferData(
+                GL_ARRAY_BUFFER,
+                transforms.size() * sizeof(glm::mat4),
+                transforms.data(),
+                GL_DYNAMIC_DRAW
+            );
+
+            //bind VAO and draw call
+            glBindVertexArray(mesh.VAO);
+            glDrawElementsInstanced(
+                GL_TRIANGLES,
+                mesh.indices.size(),
+                GL_UNSIGNED_INT,
+                0,
+                transforms.size()
+            );
+        }
     }
 }
