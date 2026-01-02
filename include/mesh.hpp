@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <string>
 #include <assimp/scene.h>
+#include <array>
 
 struct Vertex {
     glm::vec3 position;
@@ -14,6 +15,8 @@ struct Texture {
     unsigned int id;
     std::string type;
     std::string path;
+
+    std::unordered_map<unsigned int, unsigned int> cachedLoc;
 };
 
 class Mesh {
@@ -27,6 +30,7 @@ class Mesh {
         unsigned int VAO, VBO, EBO;
         unsigned int instanceVBO;
     private:
+        
 
         void setupMesh();
 };

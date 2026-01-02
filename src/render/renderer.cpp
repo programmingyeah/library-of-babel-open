@@ -11,6 +11,8 @@
 #include "game_object.hpp"
 #include "mesh.hpp"
 
+#include <chrono>
+
 float vertices[] = {
     // positions         // colors
    -0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,
@@ -95,139 +97,69 @@ void Renderer::setup() {
     glEnable(GL_DEPTH_TEST);
 }
 
-void Renderer::drawModel(Model* model) {
-    if (!model) return;
-
-    for(unsigned int i = 0; i < model->meshes.size(); i++) {
-        glUseProgram(shaderProgram); 
-
-        unsigned int diffuseNr = 1;
-        unsigned int specularNr = 1;
-
-        for(unsigned int j = 0; j < model->meshes[i].textures.size(); j++)
-        {
-            glActiveTexture(GL_TEXTURE0 + j);
-
-            std::string number;
-            std::string name = model->meshes[i].textures[j].type;
-
-            if(name == "texture_diffuse")
-                number = std::to_string(diffuseNr++);
-            else if(name == "texture_specular")
-                number = std::to_string(specularNr++);
-
-            if (model->meshes[i].textures[j].id != 0)
-                glBindTexture(GL_TEXTURE_2D, model->meshes[i].textures[j].id);
-
-            glUniform1i(
-                glGetUniformLocation(shaderProgram, ("material." + name + number).c_str()),
-                j
-            );
-        }
-
-        glActiveTexture(GL_TEXTURE0);
-
-        glBindVertexArray(model->meshes[i].VAO);
-        glDrawElements(GL_TRIANGLES, model->meshes[i].indices.size(), GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
-    }
-}
-
 void Renderer::drawFrame(GLFWwindow* window, Camera camera, std::vector<GameObject*> objects) {
     int SCR_WIDTH = 0;
     int SCR_HEIGHT = 0;
-
     glfwGetWindowSize(window, &SCR_WIDTH, &SCR_HEIGHT);
 
-    glClearColor(0.1f, 0.2f, 0.3f, 1.0f); 
+    glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    //draw commands
-    /*for (GameObject* obj : objects) {
-
-        glm::mat4 model = glm::translate(glm::mat4(1.0), obj->position);
-        glm::mat4 view = camera.getViewMatrix();
-        glm::mat4 projection = camera.getProjectionMatrix();
-
-        glUseProgram(shaderProgram);
-
-        //uniforms
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
-        GLuint loc = glGetUniformLocation(shaderProgram, "uViewPos");
-        glUniform3fv(loc, 1, glm::value_ptr(camera.pos));
-
-        drawModel(obj->model);
-    }*/
-
     std::unordered_map<Model*, std::vector<glm::mat4>> batches;
-
     for (GameObject* obj : objects) {
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), obj->position);
-        batches[obj->model].push_back(model);
+        glm::mat4 modelMat = glm::translate(glm::mat4(1.0f), obj->position);
+        batches[obj->model].push_back(modelMat);
     }
 
+    glUseProgram(shaderProgram);
 
+    glm::mat4 view = camera.getViewMatrix();
+    glm::mat4 projection = camera.getProjectionMatrix();
+
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
+    glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
+    GLuint locViewPos = glGetUniformLocation(shaderProgram, "uViewPos");
+    glUniform3fv(locViewPos, 1, glm::value_ptr(camera.pos));
+
+
+    auto start = std::chrono::high_resolution_clock::now();
     for (auto& [model, transforms] : batches) {
-
         for (Mesh& mesh : model->meshes) {
-            glm::mat4 view = camera.getViewMatrix();
-            glm::mat4 projection = camera.getProjectionMatrix();
 
-            glUseProgram(shaderProgram);
-
-            //bind textures
+            //once per mesh
             unsigned int diffuseNr = 1;
             unsigned int specularNr = 1;
 
-            for(unsigned int j = 0; j < mesh.textures.size(); j++)
-            {
+            for (unsigned int j = 0; j < mesh.textures.size(); j++) {
                 glActiveTexture(GL_TEXTURE0 + j);
+                glBindTexture(GL_TEXTURE_2D, mesh.textures[j].id);
 
                 std::string number;
-                std::string name = mesh.textures[j].type;
+                if (mesh.textures[j].type == "texture_diffuse") number = std::to_string(diffuseNr++);
+                else if (mesh.textures[j].type == "texture_specular") number = std::to_string(specularNr++);
 
-                if(name == "texture_diffuse")
-                    number = std::to_string(diffuseNr++);
-                else if(name == "texture_specular")
-                    number = std::to_string(specularNr++);
+                // lazy cache uniform location per shader
+                GLuint loc;
+                if (mesh.textures[j].cachedLoc.count(shaderProgram) == 0) {
+                    loc = glGetUniformLocation(shaderProgram, ("material." + mesh.textures[j].type + number).c_str());
+                    mesh.textures[j].cachedLoc[shaderProgram] = loc;
+                } else {
+                    loc = mesh.textures[j].cachedLoc[shaderProgram];
+                }
 
-                if (mesh.textures[j].id != 0)
-                    glBindTexture(GL_TEXTURE_2D, mesh.textures[j].id);
-
-                glUniform1i(
-                    glGetUniformLocation(shaderProgram, ("material." + name + number).c_str()),
-                    j
-                );
+                glUniform1i(loc, j);
             }
-
             glActiveTexture(GL_TEXTURE0);
 
-            //uniforms
-            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, &view[0][0]);
-            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, &projection[0][0]);
-            GLuint loc = glGetUniformLocation(shaderProgram, "uViewPos");
-            glUniform3fv(loc, 1, glm::value_ptr(camera.pos));
-
-            //bind and initialize instancing data
             glBindBuffer(GL_ARRAY_BUFFER, mesh.instanceVBO);
-            glBufferData(
-                GL_ARRAY_BUFFER,
-                transforms.size() * sizeof(glm::mat4),
-                transforms.data(),
-                GL_DYNAMIC_DRAW
-            );
+            glBufferData(GL_ARRAY_BUFFER, transforms.size() * sizeof(glm::mat4), transforms.data(), GL_DYNAMIC_DRAW);
 
-            //bind VAO and draw call
             glBindVertexArray(mesh.VAO);
-            glDrawElementsInstanced(
-                GL_TRIANGLES,
-                mesh.indices.size(),
-                GL_UNSIGNED_INT,
-                0,
-                transforms.size()
-            );
+            glDrawElementsInstanced(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, 0, transforms.size());
         }
     }
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+    std::cout << "updateChunksAndTransforms took " << duration << " μs\n";
 }
