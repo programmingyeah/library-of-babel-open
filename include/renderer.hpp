@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <memory>
 
 
 struct GLFWwindow;
@@ -17,7 +18,9 @@ public:
 
     void setup();
 
-    void drawFrame(GLFWwindow* window, Camera camera, std::vector<GameObject*> models);
+    void drawFrame(GLFWwindow* window, Camera camera, std::vector<GameObject*> objects);
+
+    void drawBatches(std::unordered_map<Model*, std::vector<glm::mat4>> batches);
 
     void drawModel(Model* model);
 

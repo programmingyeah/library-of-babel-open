@@ -33,7 +33,9 @@ set(SRC
     src/main.cpp
     src/render/renderer.cpp
     src/render/mesh.cpp
+    src/input.cpp
     src/world/game_object.cpp
+    src/world/world_gen.cpp
     src/camera.cpp
 )
 

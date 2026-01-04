@@ -6,12 +6,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <GLFW/glfw3.h>
+#include <chrono>
+#include <memory>
 #include "camera.hpp"
 #include "renderer.hpp"
 #include "game_object.hpp"
 #include "mesh.hpp"
-
-#include <chrono>
 
 float vertices[] = {
     // positions         // colors
@@ -97,6 +97,46 @@ void Renderer::setup() {
     glEnable(GL_DEPTH_TEST);
 }
 
+
+
+void Renderer::drawBatches(std::unordered_map<Model*, std::vector<glm::mat4>> batches){
+    for (auto& [model, transforms] : batches) {
+        for (Mesh& mesh : model->meshes) {
+            //once per mesh
+
+            unsigned int diffuseNr = 1;
+            unsigned int specularNr = 1;
+
+            for (unsigned int j = 0; j < mesh.textures.size(); j++) {
+                glActiveTexture(GL_TEXTURE0 + j);
+                glBindTexture(GL_TEXTURE_2D, mesh.textures[j].id);
+                
+                std::string number;
+                if (mesh.textures[j].type == "texture_diffuse") number = std::to_string(diffuseNr++);
+                else if (mesh.textures[j].type == "texture_specular") number = std::to_string(specularNr++);
+                
+                // lazy cache uniform location per shader
+                GLuint loc;
+                if (mesh.textures[j].cachedLoc.count(shaderProgram) == 0) {
+                    loc = glGetUniformLocation(shaderProgram, ("material." + mesh.textures[j].type + number).c_str());
+                    mesh.textures[j].cachedLoc[shaderProgram] = loc;
+                } else {
+                    loc = mesh.textures[j].cachedLoc[shaderProgram];
+                }
+
+                glUniform1i(loc, j);
+            }
+
+            glActiveTexture(GL_TEXTURE0);
+            glBindBuffer(GL_ARRAY_BUFFER, mesh.instanceVBO);
+            glBufferData(GL_ARRAY_BUFFER, transforms.size() * sizeof(glm::mat4), transforms.data(), GL_DYNAMIC_DRAW);
+            glBindVertexArray(mesh.VAO);
+            glDrawElementsInstanced(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, 0, transforms.size());
+            
+        }
+    }
+}
+
 void Renderer::drawFrame(GLFWwindow* window, Camera camera, std::vector<GameObject*> objects) {
     int SCR_WIDTH = 0;
     int SCR_HEIGHT = 0;
@@ -123,41 +163,8 @@ void Renderer::drawFrame(GLFWwindow* window, Camera camera, std::vector<GameObje
 
 
     auto start = std::chrono::high_resolution_clock::now();
-    for (auto& [model, transforms] : batches) {
-        for (Mesh& mesh : model->meshes) {
 
-            //once per mesh
-            unsigned int diffuseNr = 1;
-            unsigned int specularNr = 1;
-
-            for (unsigned int j = 0; j < mesh.textures.size(); j++) {
-                glActiveTexture(GL_TEXTURE0 + j);
-                glBindTexture(GL_TEXTURE_2D, mesh.textures[j].id);
-
-                std::string number;
-                if (mesh.textures[j].type == "texture_diffuse") number = std::to_string(diffuseNr++);
-                else if (mesh.textures[j].type == "texture_specular") number = std::to_string(specularNr++);
-
-                // lazy cache uniform location per shader
-                GLuint loc;
-                if (mesh.textures[j].cachedLoc.count(shaderProgram) == 0) {
-                    loc = glGetUniformLocation(shaderProgram, ("material." + mesh.textures[j].type + number).c_str());
-                    mesh.textures[j].cachedLoc[shaderProgram] = loc;
-                } else {
-                    loc = mesh.textures[j].cachedLoc[shaderProgram];
-                }
-
-                glUniform1i(loc, j);
-            }
-            glActiveTexture(GL_TEXTURE0);
-
-            glBindBuffer(GL_ARRAY_BUFFER, mesh.instanceVBO);
-            glBufferData(GL_ARRAY_BUFFER, transforms.size() * sizeof(glm::mat4), transforms.data(), GL_DYNAMIC_DRAW);
-
-            glBindVertexArray(mesh.VAO);
-            glDrawElementsInstanced(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, 0, transforms.size());
-        }
-    }
+    drawBatches(batches);
 
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
